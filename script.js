@@ -11,13 +11,48 @@ function generarNumeroAleatorio(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Copiar texto al portapapeles
+function copiarAlPortapapeles(texto) {
+    // Usar la API Clipboard para copiar
+    navigator.clipboard.writeText(texto).then(function() {
+        console.log('Código HEX copiado: ' + texto);
+    }).catch(function(err) {
+        console.error('Error al copiar: ', err);
+    });
+}
+
+// Mostrar feedback visual de copia como overlay
+function mostrarFeedbackCopia(elemento) {
+    // Crear elemento flotante
+    const feedback = document.createElement('div');
+    feedback.className = 'feedback-copia';
+    feedback.innerHTML = '✓ ¡Copiado!';
+    
+    // Posicionar el overlay sobre el elemento
+    elemento.style.position = 'relative';
+    elemento.appendChild(feedback);
+    
+    // Animar entrada
+    setTimeout(function() {
+        feedback.classList.add('mostrar');
+    }, 10);
+    
+    // Remover después de 1.5 segundos
+    setTimeout(function() {
+        feedback.classList.remove('mostrar');
+        setTimeout(function() {
+            feedback.remove();
+        }, 300);
+    }, 1500);
+}
+
 // ====== FUNCIONES DE GENERACIÓN DE COLORES ======
 
 // Generar un color HSL aleatorio
 function generarColorHSL() {
     const hue = generarNumeroAleatorio(0, 360);
-    const saturation = generarNumeroAleatorio(50, 100);
-    const lightness = generarNumeroAleatorio(40, 80);
+    const saturation = generarNumeroAleatorio(0, 100);
+    const lightness = generarNumeroAleatorio(0, 80);
     
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
@@ -168,12 +203,24 @@ function crearTarjetaColor(color, indice) {
     colorDisplay.className = 'color-display';
     colorDisplay.style.backgroundColor = color.principal;
     
+    // Agregar evento de clic para copiar HEX al hacer clic en el color
+    colorDisplay.addEventListener('click', function() {
+        copiarAlPortapapeles(color.hex);
+        mostrarFeedbackCopia(colorDisplay);
+    });
+    
     const colorInfo = document.createElement('div');
     colorInfo.className = 'color-info';
     
     const colorHex = document.createElement('div');
     colorHex.className = 'color-hex';
     colorHex.innerHTML = `HEX: ${color.hex}`;
+    
+    // Agregar evento de clic para copiar HEX al hacer clic en el código
+    colorHex.addEventListener('click', function() {
+        copiarAlPortapapeles(color.hex);
+        mostrarFeedbackCopia(colorHex);
+    });
     
     // Botón de bloqueo
     const botonBloqueo = document.createElement('button');
