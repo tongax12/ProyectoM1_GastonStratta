@@ -43,14 +43,14 @@ function HSLaHEX(hsl) {
     if (s === 0) {
         r = g = b = l;
     } else {
-        const hue2rgb = (p, q, t) => {
+        function hue2rgb(p, q, t) {
             if (t < 0) t += 1;
             if (t > 1) t -= 1;
             if (t < 1/6) return p + (q - p) * 6 * t;
             if (t < 1/2) return q;
             if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
             return p;
-        };
+        }
         
         const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         const p = 2 * l - q;
@@ -60,23 +60,22 @@ function HSLaHEX(hsl) {
         b = hue2rgb(p, q, h / 360 - 1/3);
     }
     
-    const toHex = (x) => {
-        const hex = Math.round(x * 255).toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-    };
+    function toHex(x) {
+    const hex = Math.round(x * 255).toString(16);
+    return (hex.length === 1 ? '0' + hex : hex).toUpperCase();
+}
     
     return '#' + toHex(r) + toHex(g) + toHex(b);
 }
 
 // ====== FUNCIONES DE INTERFAZ ======
 
-// Obtener valores de los selects del HTML
+// Obtener valores de los selects
 function obtenerValoresDelFormulario() {
-    const cantidadSelects = document.querySelectorAll('select');
+    const selects = document.querySelectorAll('select');
     
-    // El primer select es cantidad, el segundo es formato
-    const cantidadValue = cantidadSelects[0].value;
-    const formatoValue = cantidadSelects[1].value;
+    const cantidadValue = selects[0].value;
+    const formatoValue = selects[1].value;
     
     return {
         cantidad: parseInt(cantidadValue),
@@ -122,7 +121,7 @@ function generarColores(cantidad, formato) {
 // Crear tarjeta de color
 function crearTarjetaColor(color, formato) {
     const card = document.createElement('div');
-    card.className = 'color-card';
+    card.className = 'tarjeta-color';
     
     const colorDisplay = document.createElement('div');
     colorDisplay.className = 'color-display';
@@ -131,14 +130,10 @@ function crearTarjetaColor(color, formato) {
     const colorInfo = document.createElement('div');
     colorInfo.className = 'color-info';
     
-    const formatoParamostrar = document.createElement('p');
-    formatoParamostrar.innerHTML = `<strong>${formato}:</strong> ${color.principal}`;
-    
     const colorHex = document.createElement('div');
     colorHex.className = 'color-hex';
     colorHex.innerHTML = `HEX: ${color.hex}`;
     
-    colorInfo.appendChild(formatoParamostrar);
     colorInfo.appendChild(colorHex);
     
     card.appendChild(colorDisplay);
@@ -146,16 +141,26 @@ function crearTarjetaColor(color, formato) {
     
     return card;
 }
-
-// Mostrar colores en pantalla
+// Mostrar colores en la section paletaColores
 function mostrarColores(colores, formato) {
-    const contenedor = document.getElementById('colores');
+    const contenedor = document.getElementById('paletaColores');
+    
+    if (!contenedor) {
+        console.error('No se encontró la section paletaColores');
+        return;
+    }
+    
     contenedor.innerHTML = '';
     
-    colores.forEach((color) => {
+    const divColores = document.createElement('div');
+    divColores.className = 'contenedor-colores';
+    
+    colores.forEach(function(color) {
         const tarjeta = crearTarjetaColor(color, formato);
-        contenedor.appendChild(tarjeta);
+        divColores.appendChild(tarjeta);
     });
+    
+    contenedor.appendChild(divColores);
 }
 
 // ====== FUNCIÓN PRINCIPAL ======
@@ -172,10 +177,9 @@ function generarPaleta() {
 
 // ====== EVENT LISTENERS ======
 
-// Agregar evento al botón cuando se cargue la página
-document.addEventListener('DOMContentLoaded', () => {
-    const botones = document.querySelectorAll('button');
-    if (botones.length > 0) {
-        botones[0].addEventListener('click', generarPaleta);
+document.addEventListener('DOMContentLoaded', function() {
+    const boton = document.getElementById('generaPaleta');
+    if (boton) {
+        boton.addEventListener('click', generarPaleta);
     }
 });
