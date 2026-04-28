@@ -1,3 +1,9 @@
+// ====== ESTADO GLOBAL ======
+
+// Almacenar los colores actuales y cuáles están bloqueados
+let coloresActuales = [];
+let coloresBloqueados = {};
+
 // ====== FUNCIONES AUXILIARES ======
 
 // Generar un número aleatorio entre min y max
@@ -61,9 +67,9 @@ function HSLaHEX(hsl) {
     }
     
     function toHex(x) {
-    const hex = Math.round(x * 255).toString(16);
-    return (hex.length === 1 ? '0' + hex : hex).toUpperCase();
-}
+        const hex = Math.round(x * 255).toString(16);
+        return (hex.length === 1 ? '0' + hex : hex).toUpperCase();
+    }
     
     return '#' + toHex(r) + toHex(g) + toHex(b);
 }
@@ -100,28 +106,63 @@ function validarSelecciones() {
     return true;
 }
 
-// Generar colores según el formato
+// Generar colores según el formato, respetando los bloqueados
 function generarColores(cantidad, formato) {
     const colores = [];
     
     for (let i = 0; i < cantidad; i++) {
-        if (formato === 'HSL') {
-            const colorHSL = generarColorHSL();
-            const colorHEX = HSLaHEX(colorHSL);
-            colores.push({ principal: colorHSL, hex: colorHEX });
-        } else if (formato === 'HEX') {
-            const colorHEX = generarColorHEX();
-            colores.push({ principal: colorHEX, hex: colorHEX });
+        // Si el color está bloqueado, mantener el anterior
+        if (coloresBloqueados[i]) {
+            colores.push(coloresActuales[i]);
+        } else {
+            // Generar nuevo color
+            if (formato === 'HSL') {
+                const colorHSL = generarColorHSL();
+                const colorHEX = HSLaHEX(colorHSL);
+                colores.push({ principal: colorHSL, hex: colorHEX });
+            } else if (formato === 'HEX') {
+                const colorHEX = generarColorHEX();
+                colores.push({ principal: colorHEX, hex: colorHEX });
+            }
         }
     }
+    
+    // Guardar los colores actuales para futuras generaciones
+    coloresActuales = colores;
     
     return colores;
 }
 
+// Función para bloquear/desbloquear un color
+function toggleBloquearColor(indice) {
+    if (coloresBloqueados[indice]) {
+        coloresBloqueados[indice] = false;
+    } else {
+        coloresBloqueados[indice] = true;
+    }
+    
+    // Redibujar las tarjetas para actualizar los botones
+    const colores = coloresActuales;
+    const contenedor = document.getElementById('paletaColores');
+    
+    const divColores = contenedor.querySelector('.contenedor-colores');
+    divColores.innerHTML = '';
+    
+    colores.forEach(function(color, index) {
+        const tarjeta = crearTarjetaColor(color, index);
+        divColores.appendChild(tarjeta);
+    });
+}
+
 // Crear tarjeta de color
-function crearTarjetaColor(color, formato) {
+function crearTarjetaColor(color, indice) {
     const card = document.createElement('div');
     card.className = 'tarjeta-color';
+    
+    // Agregar clase si el color está bloqueado
+    if (coloresBloqueados[indice]) {
+        card.classList.add('bloqueado');
+    }
     
     const colorDisplay = document.createElement('div');
     colorDisplay.className = 'color-display';
@@ -134,13 +175,23 @@ function crearTarjetaColor(color, formato) {
     colorHex.className = 'color-hex';
     colorHex.innerHTML = `HEX: ${color.hex}`;
     
+    // Botón de bloqueo
+    const botonBloqueo = document.createElement('button');
+    botonBloqueo.className = 'boton-bloqueo';
+    botonBloqueo.innerHTML = coloresBloqueados[indice] ? '🔒 Bloqueado' : '🔓 Bloquear';
+    botonBloqueo.addEventListener('click', function() {
+        toggleBloquearColor(indice);
+    });
+    
     colorInfo.appendChild(colorHex);
+    colorInfo.appendChild(botonBloqueo);
     
     card.appendChild(colorDisplay);
     card.appendChild(colorInfo);
     
     return card;
 }
+
 // Mostrar colores en la section paletaColores
 function mostrarColores(colores, formato) {
     const contenedor = document.getElementById('paletaColores');
@@ -155,8 +206,8 @@ function mostrarColores(colores, formato) {
     const divColores = document.createElement('div');
     divColores.className = 'contenedor-colores';
     
-    colores.forEach(function(color) {
-        const tarjeta = crearTarjetaColor(color, formato);
+    colores.forEach(function(color, indice) {
+        const tarjeta = crearTarjetaColor(color, indice);
         divColores.appendChild(tarjeta);
     });
     
@@ -171,6 +222,12 @@ function generarPaleta() {
     }
     
     const { cantidad, formato } = obtenerValoresDelFormulario();
+    
+    // Limpiar bloqueos si es una generación nueva (primera vez)
+    if (coloresActuales.length === 0) {
+        coloresBloqueados = {};
+    }
+    
     const colores = generarColores(cantidad, formato);
     mostrarColores(colores, formato);
 }

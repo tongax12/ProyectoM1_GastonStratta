@@ -166,3 +166,42 @@ footer {
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
 }
+
+/* ====== BOTÓN DE BLOQUEO ====== */
+
+.boton-bloqueo {
+    background-color: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.boton-bloqueo:hover {
+    background-color: #764ba2;
+    transform: scale(1.05);
+}
+
+.boton-bloqueo:active {
+    transform: scale(0.95);
+}
+
+/* Estilos para tarjetas bloqueadas */
+
+.tarjeta-color.bloqueado .color-display {
+    filter: brightness(0.95);
+}
+
+.tarjeta-color.bloqueado .boton-bloqueo {
+    background-color: #FF6B6B;
+}
+
+.tarjeta-color.bloqueado .boton-bloqueo:hover {
+    background-color: #FF5252;
+}
