@@ -128,12 +128,12 @@ function obtenerValoresDelFormulario() {
 function validarSelecciones() {
     const { cantidad, formato } = obtenerValoresDelFormulario();
     
-    if (!cantidad || cantidad === 0) {
+    if (!cantidad || cantidad === 0 || isNaN(cantidad)) {
         alert('Por favor selecciona una cantidad de colores');
         return false;
     }
     
-    if (!formato) {
+    if (!formato || formato === 'Seleccione un formato') {
         alert('Por favor selecciona un formato (HSL o HEX)');
         return false;
     }
